@@ -10,7 +10,7 @@ st.title("🏫 Gestion de eventos escolares")
 # URLs de la API (debes reemplazarlas con tus endpoints reales)
 API_ENDPOINTS = {
     "estudiantes": "https://eventos-25.onrender.com/api/estudiantes",
-    "asitencia": "https://eventos-25.onrender.com/api/asistenciaeventos",
+    "asitenciaevento": "https://eventos-25.onrender.com/api/asistenciaeventos",
     "evento": "https://eventos-25.onrender.com/api/eventos",
     "categoriaevento": "https://eventos-25.onrender.com/api/categoriaeventos",
     "participante": "https://eventos-25.onrender.com/api/participantes",
@@ -51,17 +51,17 @@ def cargar_datos(tipo):
 # Cargar todos los datos
 with st.spinner("Cargando datos del evento..."):
     estudiantes_df = cargar_datos("estudiantes")
-    asitencia_df = cargar_datos("asistencia")
+    asitenciaevento_df = cargar_datos("asistenciaeventos")
     evento_df = cargar_datos("evento")
-    categoriaevento_df = cargar_datos("categoriaevento")
-    participante_df = cargar_datos("participante")
-    profesores_df = cargar_datos("profesror")
+    categoriaevento_df = cargar_datos("categoriaeventos")
+    participante_df = cargar_datos("participantes")
+    profesores_df = cargar_datos("profesrores")
 
 # Sidebar con selección de tabla principal
 st.sidebar.header("🔍 Filtros Principales")
 tabla_seleccionada = st.sidebar.selectbox(
     "Seleccionar tabla para visualizar",
-    opcions=["Estudiantes", "eventos", "Profesores"],
+    opcions=["Estudiantes", "eventos", "Profesores", "Asistencia Eventos", "Categoría Eventos", "Participantes"],
     index=0
 )
 
@@ -75,12 +75,12 @@ def mostrar_tabla(titulo, df, columnas_filtro):
     
     # Filtros dinámicos
     with st.expander("⚙️ Filtros Avanzados", expanded=False):
-        cols = st.columns(3)
+        cols = st.columns(6)
         filtros = {}
         
         for i, col in enumerate(columnas_filtro):
             if col in df.columns:
-                with cols[i % 3]:
+                with cols[i % 6]:
                     if df[col].dtype == 'object':
                         options = ['Todos'] + sorted(df[col].dropna().unique().tolist())
                         seleccion = st.selectbox(f"Filtrar por {col}", options)
