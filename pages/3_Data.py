@@ -5,10 +5,10 @@ import plotly.graph_objects as go
 from datetime import datetime
 import uuid
 
-# Set page configuration for a wide layout and custom title
-st.set_page_config(page_title="Electric Car Registry Dashboard", layout="wide")
+# Configuración de la página
+st.set_page_config(page_title="Tablero de Registro de Carros Eléctricos", layout="wide")
 
-# Custom CSS for styling
+# CSS personalizado para estilos
 st.markdown("""
     <style>
     .main {background-color: #f0f2f6;}
@@ -20,7 +20,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Load the dataset
+# Cargar el dataset
 @st.cache_data
 def load_data():
     df = pd.read_csv("static/datasets/registros_carros_electricos.csv")
@@ -29,38 +29,38 @@ def load_data():
 
 df = load_data()
 
-# Sidebar for filters
-st.sidebar.header("Filter Options")
+# Barra lateral para filtros
+st.sidebar.header("Opciones de Filtro")
 
-# Filter by location
+# Filtro por lugar
 lugares = sorted(df["lugar_registro"].unique())
-selected_lugares = st.sidebar.multiselect("Select Location(s)", lugares, default=lugares[:3])
+selected_lugares = st.sidebar.multiselect("Selecciona Lugar(es)", lugares, default=lugares[:3])
 
-# Filter by car brand
+# Filtro por marca de auto
 marcas = sorted(df["marca_auto"].unique())
-selected_marcas = st.sidebar.multiselect("Select Car Brand(s)", marcas, default=marcas[:3])
+selected_marcas = st.sidebar.multiselect("Selecciona Marca(s) de Auto", marcas, default=marcas[:3])
 
-# Filter by model year
+# Filtro por año de modelo
 min_year, max_year = int(df["año_modelo"].min()), int(df["año_modelo"].max())
-selected_years = st.sidebar.slider("Select Model Year Range", min_year, max_year, (min_year, max_year))
+selected_years = st.sidebar.slider("Selecciona Rango de Año de Modelo", min_year, max_year, (min_year, max_year))
 
-# Filter by age
+# Filtro por edad
 min_age, max_age = int(df["edad"].min()), int(df["edad"].max())
-selected_age = st.sidebar.slider("Select Age Range", min_age, max_age, (min_age, max_age))
+selected_age = st.sidebar.slider("Selecciona Rango de Edad", min_age, max_age, (min_age, max_age))
 
-# Filter by autonomy
+# Filtro por autonomía
 min_autonomy, max_autonomy = int(df["autonomia_km"].min()), int(df["autonomia_km"].max())
-selected_autonomy = st.sidebar.slider("Select Autonomy Range (km)", min_autonomy, max_autonomy, (min_autonomy, max_autonomy))
+selected_autonomy = st.sidebar.slider("Selecciona Rango de Autonomía (km)", min_autonomy, max_autonomy, (min_autonomy, max_autonomy))
 
-# Filter by charging type
+# Filtro por tipo de carga
 tipos_carga = sorted(df["tipo_carga"].unique())
-selected_tipos_carga = st.sidebar.multiselect("Select Charging Type(s)", tipos_carga, default=tipos_carga)
+selected_tipos_carga = st.sidebar.multiselect("Selecciona Tipo(s) de Carga", tipos_carga, default=tipos_carga)
 
-# Filter by recycled batteries
+# Filtro por baterías recicladas
 baterias = df["baterias_recicladas"].unique()
-selected_baterias = st.sidebar.multiselect("Recycled Batteries", baterias, default=baterias)
+selected_baterias = st.sidebar.multiselect("Baterías Recicladas", baterias, default=baterias)
 
-# Apply filters
+# Aplicar filtros
 filtered_df = df[
     (df["lugar_registro"].isin(selected_lugares)) &
     (df["marca_auto"].isin(selected_marcas)) &
@@ -71,51 +71,58 @@ filtered_df = df[
     (df["baterias_recicladas"].isin(selected_baterias))
 ]
 
-# Main content
-st.title("Electric Car Registry Dashboard")
-st.markdown("Explore and analyze electric car registrations with interactive filters and visualizations.")
+# Contenido principal
+st.title("Tablero de Registro de Carros Eléctricos")
+st.markdown("Explora y analiza los registros de carros eléctricos con filtros y visualizaciones interactivas.")
 
-# Display key metrics
+# Métricas clave
 col1, col2, col3 = st.columns(3)
-col1.metric("Total Registrations", len(filtered_df))
-col2.metric("Average Autonomy (km)", round(filtered_df["autonomia_km"].mean(), 1))
-col3.metric("Average Age", round(filtered_df["edad"].mean(), 1))
+col1.metric("Total de Registros", len(filtered_df))
+col2.metric("Autonomía Promedio (km)", round(filtered_df["autonomia_km"].mean(), 1))
+col3.metric("Edad Promedio", round(filtered_df["edad"].mean(), 1))
 
-# Visualizations
-st.subheader("Data Visualizations")
+# Visualizaciones
+st.subheader("Visualizaciones de Datos")
 
-# Pie chart: Distribution of car brands
-fig_pie = px.pie(filtered_df, names="marca_auto", title="Distribution of Car Brands",
+# Gráfico de pastel: Distribución de marcas de autos
+fig_pie = px.pie(filtered_df, names="marca_auto", title="Distribución de marcas de autos eléctricos",
                  color_discrete_sequence=px.colors.qualitative.Bold)
 fig_pie.update_layout(font_size=12)
 st.plotly_chart(fig_pie, use_container_width=True)
 
-# Histogram: Age distribution
-fig_hist = px.histogram(filtered_df, x="edad", nbins=20, title="Age Distribution of Owners",
+# Histograma: Distribución de edades
+fig_hist = px.histogram(filtered_df, x="edad", nbins=20, title="Distribución de edades de los propietarios",
                         color_discrete_sequence=["#ff7f0e"])
-fig_hist.update_layout(font_size=12, xaxis_title="Age", yaxis_title="Count")
+fig_hist.update_layout(font_size=12, xaxis_title="Edad", yaxis_title="Cantidad")
 st.plotly_chart(fig_hist, use_container_width=True)
 
-# Bar chart: Average autonomy by brand
+# Gráfico de barras: Autonomía promedio por marca
 avg_autonomy = filtered_df.groupby("marca_auto")["autonomia_km"].mean().reset_index()
-fig_bar = px.bar(avg_autonomy, x="marca_auto", y="autonomia_km", title="Average Autonomy by Brand",
-                 color="marca_auto", color_discrete_sequence=px.colors.qualitative.Set2)
-fig_bar.update_layout(font_size=12, xaxis_title="Brand", yaxis_title="Average Autonomy (km)")
+fig_bar = px.bar(
+    avg_autonomy,
+    x="marca_auto",
+    y="autonomia_km",
+    title="Autonomía promedio por marca",
+    color="marca_auto",
+    color_discrete_sequence=px.colors.qualitative.Set2,
+    labels={"marca_auto": "Marca", "autonomia_km": "Autonomía promedio (km)"}
+)
+fig_bar.update_layout(font_size=12, xaxis_title="Marca", yaxis_title="Autonomía promedio (km)")
 st.plotly_chart(fig_bar, use_container_width=True)
 
-# Line chart: Registrations over time
+# Gráfico de líneas: Registros a lo largo del tiempo
 filtered_df["year_month"] = filtered_df["fecha_registro"].dt.to_period("M").astype(str)
 registrations_over_time = filtered_df.groupby("year_month").size().reset_index(name="count")
-fig_line = px.line(registrations_over_time, x="year_month", y="count", title="Registrations Over Time",
+fig_line = px.line(registrations_over_time, x="year_month", y="count", title="Registros a lo largo del tiempo",
                    markers=True, color_discrete_sequence=["#2ca02c"])
-fig_line.update_layout(font_size=12, xaxis_title="Year-Month", yaxis_title="Number of Registrations")
+fig_line.update_layout(font_size=12, xaxis_title="Año-Mes", yaxis_title="Número de registros")
 st.plotly_chart(fig_line, use_container_width=True)
 
-# Data table
-st.subheader("Filtered Data Table")
+# Tabla de datos
+st.subheader("Tabla de Datos Filtrados")
 st.dataframe(filtered_df.drop(columns=["year_month"] if "year_month" in filtered_df.columns else []), height=400)
 
-# Interesting fact
-st.subheader("Interesting Fact")
+# Dato interesante
+st.subheader("Dato Interesante")
 most_common_brand = filtered_df["marca_auto"].mode()[0]
-st.markdown(f"The most popular car brand in the filtered dataset is **{most_common_brand}**, reflecting its strong presence in the electric vehicle market in the selected regions!")
+st.markdown(f"La marca de auto más popular en el conjunto de datos filtrado es **{most_common_brand}**, ¡lo que refleja su fuerte presencia en el mercado de vehículos eléctricos en las regiones seleccionadas!")
